@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Task</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container py-5">
+        <h1 class="mb-4">Edit Task</h1>
+
+        <form id="editTaskForm">
+            <div class="mb-3">
+                <label for="taskTitle" class="form-label">Title</label>
+                <input type="text" class="form-control" id="taskTitle" required>
+            </div>
+            <div class="mb-3">
+                <label for="taskDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="taskDescription" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="taskStatus" class="form-label">Status</label>
+                <select class="form-select" id="taskStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="InProgress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="taskPriority" class="form-label">Priority</label>
+                <select class="form-select" id="taskPriority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="taskDueDate" class="form-label">Due Date</label>
+                <input type="date" class="form-control" id="taskDueDate">
+            </div>
+            <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+
+        <a href="index.html" class="btn btn-secondary mt-3">Back</a>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const taskId = urlParams.get("id");
+
+        async function loadTaskDetails() {
+            if (!taskId) return;
+
+            const response = await fetch(`https://localhost:7100/api/Todo/${taskId}`);
+            if (!response.ok) {
+                document.body.innerHTML = "<p class='text-danger'>Task not found.</p>";
+                return;
+            }
+
+            const task = await response.json();
+            document.getElementById("taskTitle").value = task.title;
+            document.getElementById("taskDescription").value = task.description;
+            document.getElementById("taskStatus").value = task.status;
+            document.getElementById("taskPriority").value = task.priority;
+            document.getElementById("taskDueDate").value = task.dueDate ? task.dueDate.split('T')[0] : '';
+        }
+
+        document.getElementById("editTaskForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const updatedTask = {
+                title: document.getElementById("taskTitle").value,
+                description: document.getElementById("taskDescription").value,
+                status: document.getElementById("taskStatus").value,
+                priority: document.getElementById("taskPriority").value,
+                dueDate: document.getElementById("taskDueDate").value,
+            };
+
+            const response = await fetch(`https://localhost:7100/api/Todo/${taskId}`, {
+                method: "PUT",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedTask)
+            });
+
+            if (response.ok) {
+                alert("Task updated successfully.");
+                window.location.href = "index.html";
+            } else {
+                alert("Failed to update task.");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", loadTaskDetails);
+    </script>
+</body>
+
+</html>

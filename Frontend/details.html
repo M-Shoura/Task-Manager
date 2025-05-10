@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Task Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container py-5">
+        <h1 class="mb-4">Task Details</h1>
+        <div id="taskDetails" class="border rounded p-4 shadow-sm bg-light">
+            <!-- Fetched task details will appear here -->
+        </div>
+        <a href="index.html" class="btn btn-secondary mt-3">Back</a>
+        <button id="deleteBtn" class="btn btn-danger mt-3">Delete</button>
+    </div>
+
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const taskId = urlParams.get("id");
+
+        async function loadTaskDetails() {
+            if (!taskId) return;
+
+            const response = await fetch(`https://localhost:7100/api/Todo/${taskId}`);
+            if (!response.ok) {
+                document.getElementById("taskDetails").innerHTML = "<p class='text-danger'>Task not found.</p>";
+                return;
+            }
+
+            const task = await response.json();
+            document.getElementById("taskDetails").innerHTML = `
+                <h3>${task.title}</h3>
+                <p><strong>Description:</strong> ${task.description}</p>
+                <p><strong>Status:</strong> ${task.status}</p>
+                <p><strong>Priority:</strong> ${task.priority}</p>
+                <p><strong>Due Date:</strong> ${new Date(task.dueDate).toLocaleDateString()}</p>
+                <p><strong>Created Date:</strong> ${new Date(task.createdDate).toLocaleDateString()}</p>
+                <p><strong>Last Modified Date:</strong> ${new Date(task.lastModifiedDate).toLocaleDateString()}</p>
+            `;
+        }
+
+        document.getElementById("deleteBtn").addEventListener("click", async () => {
+            const confirmDelete = confirm("Are you sure you want to delete this task?");
+            if (!confirmDelete) return;
+
+            const response = await fetch(`https://localhost:7100/api/Todo/${taskId}`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                alert("Task deleted successfully.");
+                window.location.href = "index.html";
+            } else {
+                alert("Failed to delete task.");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", loadTaskDetails);
+    </script>
+
+</body>
+
+</html>
