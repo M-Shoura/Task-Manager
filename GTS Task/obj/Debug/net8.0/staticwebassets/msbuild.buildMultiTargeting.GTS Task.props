@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\GTS Task.props" />
+</Project>
